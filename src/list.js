@@ -2,6 +2,7 @@ import { styles }     from './styles.js'
 import { div }        from './utils.js'
 import { createSelector } from './selector.js'
 import { tileGroups } from './tileGroups.js'
+import { marks }      from './marks.js'
 
 const groupKeys = Object.keys(tileGroups)
 
@@ -33,7 +34,16 @@ export const createList = (sequence, techniques, onGroupChange) => {
             applyColor()
             onGroupChange?.() })
 
-        row.append(num, name)
+        const markEl = div(styles.listMark)
+        markEl.innerText = tech.mark ?? marks[0]
+        markEl.addEventListener('click', (e) => {
+            e.stopPropagation()
+            const next = marks[(marks.indexOf(tech.mark) + 1) % marks.length]
+            tech.mark = next
+            markEl.innerText = next
+            onGroupChange?.() })
+
+        row.append(num, name, markEl)
         return row }
 
     const rows = sequence.map(makeRow)

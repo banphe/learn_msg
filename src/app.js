@@ -9,6 +9,7 @@ import { createVoice }  from './voice.js'
 import { styles }       from './styles.js'
 import { div, pane, createTabs } from './utils.js'
 import { tileGroups }   from './tileGroups.js'
+import { marks }        from './marks.js'
 
 document.documentElement.setAttribute('data-theme', 'business')
 document.body.classList.add(...styles.body.split(' '))
@@ -21,6 +22,7 @@ const [techniquesArr, sequence] = await Promise.all([
     fetch(SEQUENCE_FILE).then(r => r.json()),
 ])
 
+for (const t of techniquesArr) { if (!t.mark) t.mark = marks[0] }
 const TECHNIQUES = new Map(techniquesArr.map(t => [t.id, t]))
 
 const saveTechniques = () => fetch('/save', {

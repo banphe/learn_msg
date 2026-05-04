@@ -21,5 +21,6 @@ export const styles = {
     listRowSelected: 'list-row-selected',
     listNum:   'font-bold w-8 shrink-0',
     listName:  'text-sm',
+    listMark:  'ml-auto cursor-pointer text-base leading-none select-none',
     techName:  'ml-8 flex-1 text-2xl font-bold uppercase tracking-widest',
 }
