@@ -1,5 +1,5 @@
-import { styles } from './styles.js'
-import { div } from './utils.js'
+import { styles }     from './styles.js'
+import { div }        from './utils.js'
 import { createSelector } from './selector.js'
 import { tileGroups } from './tileGroups.js'
 
@@ -8,10 +8,10 @@ const groupKeys = Object.keys(tileGroups)
 export const createList = (sequence, techniques, onGroupChange) => {
     const list = div(styles.list)
 
-    const makeRow = (item) => {
-        const tech = techniques[item.id]
+    const makeRow = (id) => {
+        const tech = techniques.get(id)
         const row  = div(styles.listRow)
-        row.dataset.id = item.id
+        row.dataset.id = id
 
         const num  = div(styles.listNum)
         num.style.userSelect = 'none'
@@ -19,8 +19,8 @@ export const createList = (sequence, techniques, onGroupChange) => {
         name.innerText = tech?.name ?? ''
 
         const applyColor = () => {
-            const color = tileGroups[item.group]
-            num.innerText      = tech?.label ?? item.id
+            const color = tileGroups[tech.group]
+            num.innerText      = tech?.label ?? id
             num.style.color    = color ?? ''
             row.style.setProperty('--tc', color ?? '') }
 
@@ -28,8 +28,8 @@ export const createList = (sequence, techniques, onGroupChange) => {
 
         num.addEventListener('click', (e) => {
             e.stopPropagation()
-            const next = groupKeys[(groupKeys.indexOf(item.group) + 1) % groupKeys.length]
-            item.group = next
+            const next = groupKeys[(groupKeys.indexOf(tech.group) + 1) % groupKeys.length]
+            tech.group = next
             applyColor()
             onGroupChange?.() })
 
