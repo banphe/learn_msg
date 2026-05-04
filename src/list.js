@@ -3,27 +3,37 @@ import { div } from './utils.js'
 import { createSelector } from './selector.js'
 import { tileGroups } from './tileGroups.js'
 
-export const createList = (sequence, techniques) => {
+const groupKeys = Object.keys(tileGroups)
+
+export const createList = (sequence, techniques, onGroupChange) => {
     const list = div(styles.list)
 
-    const makeNum = (tech, id, color) => {
-        const el = div(styles.listNum)
-        el.innerText = tech?.label ?? id
-        if (color) el.style.color = color
-        return el }
+    const makeRow = (item) => {
+        const tech = techniques[item.id]
+        const row  = div(styles.listRow)
+        row.dataset.id = item.id
 
-    const makeName = (tech) => {
-        const el = div(styles.listName)
-        el.innerText = tech?.name ?? ''
-        return el }
+        const num  = div(styles.listNum)
+        num.style.userSelect = 'none'
+        const name = div(styles.listName)
+        name.innerText = tech?.name ?? ''
 
-    const makeRow = ({id, group}) => {
-        const tech  = techniques[id]
-        const color = tileGroups[group]
-        const row   = div(styles.listRow)
-        row.dataset.id = id
-        if (color) row.style.setProperty('--tc', color)
-        row.append(makeNum(tech, id, color), makeName(tech))
+        const applyColor = () => {
+            const color = tileGroups[item.group]
+            num.innerText      = tech?.label ?? item.id
+            num.style.color    = color ?? ''
+            row.style.setProperty('--tc', color ?? '') }
+
+        applyColor()
+
+        num.addEventListener('click', (e) => {
+            e.stopPropagation()
+            const next = groupKeys[(groupKeys.indexOf(item.group) + 1) % groupKeys.length]
+            item.group = next
+            applyColor()
+            onGroupChange?.() })
+
+        row.append(num, name)
         return row }
 
     const rows = sequence.map(makeRow)

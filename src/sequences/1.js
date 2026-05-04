@@ -1,3 +1,4 @@
+export const sequenceFile = 'src/sequences/1.js'
 const g = (group, ...ids) => ids.map(id => ({ id, group }))
 
 export const sequence = [

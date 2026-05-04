@@ -7,7 +7,7 @@ import { createSlider } from './slider.js'
 import { createTile } from './tile.js'
 import { createVoice } from './voice.js'
 import { TECHNIQUES } from './techniques.js'
-import { sequence } from './sequences/1.js'
+import { sequence, sequenceFile } from './sequences/all.js'
 import { styles } from './styles.js'
 import { div, pane, createTabs } from './utils.js'
 import { tileGroups } from './tileGroups.js'
@@ -31,7 +31,22 @@ cmds['graj']       = () => player.play()
 const voice = createVoice(cmds, selectById)
 
 const { grid, setSize, gridNext, gridPrev, gridById } = createGrid(sequence.map(({id, group}) => createTile(id, group)))
-const { list, listNext, listPrev, listById } = createList(sequence, TECHNIQUES)
+const serializeSequence = () => {
+    const lines = []
+    let i = 0
+    while (i < sequence.length) {
+        const group = sequence[i].group
+        const ids   = []
+        while (i < sequence.length && sequence[i].group === group) { ids.push(sequence[i].id); i++ }
+        lines.push(`    ...g('${group}', ${ids.join(', ')}),`) }
+    return `export const sequenceFile = '${sequenceFile}'\nconst g = (group, ...ids) => ids.map(id => ({ id, group }))\n\nexport const sequence = [\n${lines.join('\n')}\n]\n` }
+
+const saveSequence = () => fetch('/save', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ file: sequenceFile, content: serializeSequence() }) })
+
+const { list, listNext, listPrev, listById } = createList(sequence, TECHNIQUES, saveSequence)
 const [tabs, tabGrid, tabList] = createTabs(styles.tabs, styles.tab, 'Siatka', 'Lista')
 const slider = createSlider(60, 200, 100, setSize)
 const micBtn = createMicBtn(() => voice.toggle())
