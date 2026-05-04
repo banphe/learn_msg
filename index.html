@@ -9,6 +9,14 @@
     <link href="https://cdn.jsdelivr.net/npm/daisyui@5/colors/properties.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @keyframes tile-glow {
+            0%, 100% { box-shadow: 0 0 5px 2px var(--tc, #fff3); }
+            50%       { box-shadow: 0 0 18px 7px var(--tc, #fff3); }
+        }
+        .tile-selected { animation: tile-glow 2s ease-in-out infinite; }
+        .list-row-selected { border: 2px solid var(--tc, #fff3); }
+    </style>
 </head>
 <body>
     <script type="module" src="src/app.js"></script>

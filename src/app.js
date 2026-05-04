@@ -9,7 +9,8 @@ import { createVoice } from './voice.js'
 import { TECHNIQUES } from './techniques.js'
 import { sequence } from './sequences/1.js'
 import { styles } from './styles.js'
-import { div, pane, createTabs, on } from './utils.js'
+import { div, pane, createTabs } from './utils.js'
+import { tileGroups } from './tileGroups.js'
 
 document.documentElement.setAttribute('data-theme', 'business')
 document.body.classList.add(...styles.body.split(' '))
@@ -29,7 +30,7 @@ cmds['stop']       = () => player.pause()
 cmds['graj']       = () => player.play()
 const voice = createVoice(cmds, selectById)
 
-const { grid, setSize, gridNext, gridPrev, gridById } = createGrid(sequence.map(createTile))
+const { grid, setSize, gridNext, gridPrev, gridById } = createGrid(sequence.map(({id, group}) => createTile(id, group)))
 const { list, listNext, listPrev, listById } = createList(sequence, TECHNIQUES)
 const [tabs, tabGrid, tabList] = createTabs(styles.tabs, styles.tab, 'Siatka', 'Lista')
 const slider = createSlider(60, 200, 100, setSize)
@@ -46,8 +47,12 @@ const onTechChange = (e) => {
     const tech = TECHNIQUES[e.detail]
     if (!tech) return
     player.show(tech)
-    techName.innerText = tech.name }
-on('change', onTechChange, grid, list)
+    techName.innerText = tech.name
+    const item  = sequence.find(t => t.id === e.detail)
+    const color = item ? tileGroups[item.group] : null
+    if (color) techName.style.color = color }
+grid.addEventListener('change', onTechChange)
+list.addEventListener('change', onTechChange)
 
 const isGridView = () => tabGrid.classList.contains('tab-active')
 const setView = (toGrid) => {
@@ -61,4 +66,4 @@ tabList.addEventListener('click', () => setView(false))
 left.style.width = '50%'
 setView(false)
 document.body.append(tb, cnt)
-selectById(sequence[0])
+selectById(sequence[0].id)

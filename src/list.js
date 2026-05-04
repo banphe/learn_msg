@@ -1,17 +1,29 @@
 import { styles } from './styles.js'
 import { div } from './utils.js'
 import { createSelector } from './selector.js'
+import { tileGroups } from './tileGroups.js'
 
 export const createList = (sequence, techniques) => {
     const list = div(styles.list)
 
-    const makeNum  = (tech, id) => { const el = div(styles.listNum);  el.innerText = tech?.label ?? id; return el }
-    const makeName = (tech)     => { const el = div(styles.listName); el.innerText = tech?.name  ?? ''; return el }
-    const makeRow  = (id) => {
-        const tech = techniques[id]
-        const row  = div(styles.listRow)
+    const makeNum = (tech, id, color) => {
+        const el = div(styles.listNum)
+        el.innerText = tech?.label ?? id
+        if (color) el.style.color = color
+        return el }
+
+    const makeName = (tech) => {
+        const el = div(styles.listName)
+        el.innerText = tech?.name ?? ''
+        return el }
+
+    const makeRow = ({id, group}) => {
+        const tech  = techniques[id]
+        const color = tileGroups[group]
+        const row   = div(styles.listRow)
         row.dataset.id = id
-        row.append(makeNum(tech, id), makeName(tech))
+        if (color) row.style.setProperty('--tc', color)
+        row.append(makeNum(tech, id, color), makeName(tech))
         return row }
 
     const rows = sequence.map(makeRow)
