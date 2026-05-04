@@ -14,6 +14,8 @@ export const createPlayer = () => {
 
     const scheduleLoop = () => {
         clearTimeout(loopTimeout)
+        const duration = currentTech.end - currentTech.start
+        el.dispatchEvent(new CustomEvent('loopstart', { detail: { duration } }))
         const pos       = loopFromStart ? currentTech.start : player.getCurrentTime()
         loopFromStart   = false
         const remaining = (currentTech.end - pos) * 1000

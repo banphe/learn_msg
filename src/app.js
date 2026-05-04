@@ -14,7 +14,7 @@ import { marks }        from './marks.js'
 document.documentElement.setAttribute('data-theme', 'business')
 document.body.classList.add(...styles.body.split(' '))
 
-const SEQUENCE_FILE   = 'src/sequences/1.json'
+const SEQUENCE_FILE   = 'src/sequences/all.json'
 const TECHNIQUES_FILE = 'src/techniques.json'
 
 const [techniquesArr, sequence] = await Promise.all([
@@ -23,14 +23,30 @@ const [techniquesArr, sequence] = await Promise.all([
 ])
 
 for (const t of techniquesArr) { if (!t.mark) t.mark = marks[0] }
-const TECHNIQUES = new Map(techniquesArr.map(t => [t.id, t]))
+const TECHNIQUES  = new Map(techniquesArr.map(t => [t.id, t]))
+const maxDuration = Math.max(...sequence.map(id => {
+    const t = TECHNIQUES.get(id)
+    return t ? t.end - t.start : 0 }))
 
 const saveTechniques = () => fetch('/save', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body:    JSON.stringify({ file: TECHNIQUES_FILE, content: JSON.stringify(techniquesArr, null, 2) + '\n' }) })
 
-const player = createPlayer()
+const player    = createPlayer()
+const loopBg    = div(styles.loopBg)
+const loopFill  = div(styles.loopFill)
+const loopTrack = div(styles.loopTrack)
+loopTrack.append(loopBg, loopFill)
+
+player.el.addEventListener('loopstart', (e) => {
+    const { duration } = e.detail
+    const pct = `${(duration / maxDuration) * 100}%`
+    loopBg.style.height      = pct
+    loopFill.style.animation = 'none'
+    loopFill.offsetHeight
+    loopFill.style.height    = pct
+    loopFill.style.animation = `loop-fill ${duration}s linear infinite` })
 
 const selectNext = () => { isGridView() ? gridNext() : listNext() }
 const selectPrev = () => { isGridView() ? gridPrev() : listPrev() }
@@ -58,14 +74,15 @@ const tb   = pane(styles.tb, micBtn, slider, tabs, techName)
 const left  = pane(styles.left,  grid, list)
 const right = pane(styles.right, player.el)
 const grip  = createGrip(left)
-const cnt   = pane(styles.cnt, left, grip, right)
+const cnt   = pane(styles.cnt, left, grip, right, loopTrack)
 
 const onTechChange = (e) => {
     const tech = TECHNIQUES.get(e.detail)
     if (!tech) return
     player.show(tech)
     techName.innerText   = tech.name
-    techName.style.color = tileGroups[tech.group] ?? '' }
+    techName.style.color = tileGroups[tech.group] ?? ''
+    loopBg.style.height  = `${((tech.end - tech.start) / maxDuration) * 100}%` }
 grid.addEventListener('change', onTechChange)
 list.addEventListener('change', onTechChange)
 

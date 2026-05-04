@@ -22,5 +22,8 @@ export const styles = {
     listNum:   'font-bold w-8 shrink-0',
     listName:  'text-sm',
     listMark:  'ml-auto cursor-pointer text-base leading-none select-none',
+    loopTrack: 'w-5 shrink-0 bg-base-content/10 relative',
+    loopBg:    'w-full absolute top-0 bg-base-content/30',
+    loopFill:  'w-full absolute top-0 bg-primary origin-top',
     techName:  'ml-8 flex-1 text-2xl font-bold uppercase tracking-widest',
 }
