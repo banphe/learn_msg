@@ -31,31 +31,15 @@ const saveTechniques = () => fetch('/save', {
         file:    TECHNIQUES_FILE,
         content: JSON.stringify(techniquesArr, null, 2) + '\n' }) })
 
-const store   = createStore(techniquesArr, sequence, saveTechniques)
-const maxDur  = Math.max(...sequence.map(id => {
-    const t = store.get(id)
-    return t ? t.end - t.start : 0 }))
-
-const player    = createPlayer()
-const loopBg    = div(styles.loopBg)
-const loopFill  = div(styles.loopFill)
-const loopTrack = div(styles.loopTrack)
-loopTrack.append(loopBg, loopFill)
-
-player.addEventListener('loopstart', ({ detail: { duration } }) => {
-    const pct = `${(duration / maxDur) * 100}%`
-    loopBg.style.height      = pct
-    loopFill.style.animation = 'none'
-    loopFill.offsetHeight
-    loopFill.style.animation = `loop-fill ${duration}s linear infinite` })
+const store  = createStore(techniquesArr, sequence, saveTechniques)
+const player = createPlayer()
 
 store.el.addEventListener('select', ({ detail: id }) => {
     const tech = store.get(id)
     if (!tech) return
     player.show(tech)
     techName.innerText   = tech.name
-    techName.style.color = tileGroups[tech.group] ?? ''
-    loopBg.style.height  = `${((tech.end - tech.start) / maxDur) * 100}%` })
+    techName.style.color = tileGroups[tech.group] ?? '' })
 
 const voice = createVoice({
     'następna':   () => store.selectNext(),
@@ -78,7 +62,7 @@ const tb       = pane(styles.tb, micBtn, slider, tabs, techName)
 const left     = pane(styles.left, grid.grid, list.list)
 const right    = pane(styles.right, player.el)
 const grip     = createGrip(left)
-const cnt      = pane(styles.cnt, left, grip, right, loopTrack)
+const cnt      = pane(styles.cnt, left, grip, right)
 
 const setView = (toGrid) => {
     grid.grid.style.display = toGrid ? '' : 'none'

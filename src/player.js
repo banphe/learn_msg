@@ -1,5 +1,3 @@
-const SEEK_BUFFER_MS = 500
-
 export class YouTubePlayer extends EventTarget {
     #yt      = null
     #tech    = null
@@ -26,11 +24,10 @@ export class YouTubePlayer extends EventTarget {
     #scheduleLoop() {
         clearTimeout(this.#timer)
         const duration = this.#tech.end - this.#tech.start
-        this.dispatchEvent(new CustomEvent('loopstart', { detail: { duration } }))
         this.#timer = setTimeout(() => {
             this.#yt.seekTo(this.#tech.start, true)
             this.#scheduleLoop()
-        }, Math.max(0, duration * 1000 - SEEK_BUFFER_MS)) }
+        }, duration * 1000 - 500) }
 
     #doShow(tech) {
         clearTimeout(this.#timer)
