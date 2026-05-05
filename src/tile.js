@@ -1,6 +1,6 @@
 import { styles } from './styles.js'
 import { div } from './utils.js'
-import { tileGroups } from './tileGroups.js'
+import { tileGroups } from './constants.js'
 
 export const createTile = (id, group) => {
     const tile = div(styles.tile)

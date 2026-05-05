@@ -6,10 +6,10 @@ import { createPlayer } from './player.js'
 import { createSlider } from './slider.js'
 import { createTile }   from './tile.js'
 import { createVoice }  from './voice.js'
+import { createStore }  from './store.js'
 import { styles }       from './styles.js'
 import { div, pane, createTabs } from './utils.js'
-import { tileGroups }   from './tileGroups.js'
-import { marks }        from './marks.js'
+import { tileGroups, marks }     from './constants.js'
 
 document.documentElement.setAttribute('data-theme', 'business')
 document.body.classList.add(...styles.body.split(' '))
@@ -23,15 +23,18 @@ const [techniquesArr, sequence] = await Promise.all([
 ])
 
 for (const t of techniquesArr) { if (!t.mark) t.mark = marks[0] }
-const TECHNIQUES  = new Map(techniquesArr.map(t => [t.id, t]))
-const maxDuration = Math.max(...sequence.map(id => {
-    const t = TECHNIQUES.get(id)
-    return t ? t.end - t.start : 0 }))
 
 const saveTechniques = () => fetch('/save', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ file: TECHNIQUES_FILE, content: JSON.stringify(techniquesArr, null, 2) + '\n' }) })
+    body:    JSON.stringify({
+        file:    TECHNIQUES_FILE,
+        content: JSON.stringify(techniquesArr, null, 2) + '\n' }) })
+
+const store   = createStore(techniquesArr, sequence, saveTechniques)
+const maxDur  = Math.max(...sequence.map(id => {
+    const t = store.get(id)
+    return t ? t.end - t.start : 0 }))
 
 const player    = createPlayer()
 const loopBg    = div(styles.loopBg)
@@ -39,57 +42,47 @@ const loopFill  = div(styles.loopFill)
 const loopTrack = div(styles.loopTrack)
 loopTrack.append(loopBg, loopFill)
 
-player.el.addEventListener('loopstart', (e) => {
-    const { duration } = e.detail
-    const pct = `${(duration / maxDuration) * 100}%`
+player.addEventListener('loopstart', ({ detail: { duration } }) => {
+    const pct = `${(duration / maxDur) * 100}%`
     loopBg.style.height      = pct
     loopFill.style.animation = 'none'
     loopFill.offsetHeight
-    loopFill.style.height    = pct
     loopFill.style.animation = `loop-fill ${duration}s linear infinite` })
 
-const selectNext = () => { isGridView() ? gridNext() : listNext() }
-const selectPrev = () => { isGridView() ? gridPrev() : listPrev() }
-const selectById = (id) => { gridById(id); listById(id) }
-
-const cmds = {}
-cmds['następna']   = selectNext
-cmds['poprzednia'] = selectPrev
-cmds['dalej']      = selectNext
-cmds['wstecz']     = selectPrev
-cmds['stop']       = () => player.pause()
-cmds['graj']       = () => player.play()
-const voice = createVoice(cmds, selectById)
-
-const { grid, setSize, gridNext, gridPrev, gridById } = createGrid(
-    sequence.map(id => createTile(id, TECHNIQUES.get(id)?.group)))
-
-const { list, listNext, listPrev, listById } = createList(sequence, TECHNIQUES, saveTechniques)
-
-const [tabs, tabGrid, tabList] = createTabs(styles.tabs, styles.tab, 'Siatka', 'Lista')
-const slider  = createSlider(60, 200, 100, setSize)
-const micBtn  = createMicBtn(() => voice.toggle())
-const techName = div(styles.techName)
-const tb   = pane(styles.tb, micBtn, slider, tabs, techName)
-const left  = pane(styles.left,  grid, list)
-const right = pane(styles.right, player.el)
-const grip  = createGrip(left)
-const cnt   = pane(styles.cnt, left, grip, right, loopTrack)
-
-const onTechChange = (e) => {
-    const tech = TECHNIQUES.get(e.detail)
+store.el.addEventListener('select', ({ detail: id }) => {
+    const tech = store.get(id)
     if (!tech) return
     player.show(tech)
     techName.innerText   = tech.name
     techName.style.color = tileGroups[tech.group] ?? ''
-    loopBg.style.height  = `${((tech.end - tech.start) / maxDuration) * 100}%` }
-grid.addEventListener('change', onTechChange)
-list.addEventListener('change', onTechChange)
+    loopBg.style.height  = `${((tech.end - tech.start) / maxDur) * 100}%` })
 
-const isGridView = () => tabGrid.classList.contains('tab-active')
+const voice = createVoice({
+    'następna':   () => store.selectNext(),
+    'poprzednia': () => store.selectPrev(),
+    'dalej':      () => store.selectNext(),
+    'wstecz':     () => store.selectPrev(),
+    'stop':       () => player.pause(),
+    'graj':       () => player.play(),
+}, (id) => store.select(id))
+
+const tiles  = sequence.map(id => createTile(id, store.get(id)?.group))
+const grid   = createGrid(tiles, store)
+const list   = createList(store)
+
+const [tabs, tabGrid, tabList] = createTabs(styles.tabs, styles.tab, 'Siatka', 'Lista')
+const slider   = createSlider(60, 200, 100, (v) => grid.setSize(v))
+const micBtn   = createMicBtn(() => voice.toggle())
+const techName = div(styles.techName)
+const tb       = pane(styles.tb, micBtn, slider, tabs, techName)
+const left     = pane(styles.left, grid.grid, list.list)
+const right    = pane(styles.right, player.el)
+const grip     = createGrip(left)
+const cnt      = pane(styles.cnt, left, grip, right, loopTrack)
+
 const setView = (toGrid) => {
-    grid.style.display = toGrid ? '' : 'none'
-    list.style.display = toGrid ? 'none' : ''
+    grid.grid.style.display = toGrid ? '' : 'none'
+    list.list.style.display = toGrid ? 'none' : ''
     tabGrid.classList.toggle('tab-active',  toGrid)
     tabList.classList.toggle('tab-active', !toGrid) }
 
@@ -98,4 +91,4 @@ tabList.addEventListener('click', () => setView(false))
 left.style.width = '50%'
 setView(false)
 document.body.append(tb, cnt)
-selectById(sequence[0])
+store.select(sequence[0])

@@ -17,15 +17,3 @@ export const createTabs = (containerClass, tabClass, ...labels) => {
     const tabs = labels.map(text => { const t = btn(tabClass); t.role = 'tab'; t.innerText = text; return t })
     container.append(...tabs)
     return [container, ...tabs] }
-
-export const input = (classes) => {
-    const e = el('input', classes)
-    e.type = 'checkbox'
-    return e
-}
-
-export const label = (classes, text, control) => {
-    const e = el('label', classes)
-    e.append(text, control)
-    return e
-}

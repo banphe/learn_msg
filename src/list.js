@@ -1,16 +1,15 @@
-import { styles }     from './styles.js'
-import { div }        from './utils.js'
+import { styles }         from './styles.js'
+import { div }            from './utils.js'
 import { createSelector } from './selector.js'
-import { tileGroups } from './tileGroups.js'
-import { marks }      from './marks.js'
+import { tileGroups, marks } from './constants.js'
 
 const groupKeys = Object.keys(tileGroups)
 
-export const createList = (sequence, techniques, onGroupChange) => {
+export const createList = (store) => {
     const list = div(styles.list)
 
     const makeRow = (id) => {
-        const tech = techniques.get(id)
+        const tech = store.get(id)
         const row  = div(styles.listRow)
         row.dataset.id = id
 
@@ -20,9 +19,9 @@ export const createList = (sequence, techniques, onGroupChange) => {
         name.innerText = tech?.name ?? ''
 
         const applyColor = () => {
-            const color = tileGroups[tech.group]
-            num.innerText      = tech?.label ?? id
-            num.style.color    = color ?? ''
+            const color    = tileGroups[tech.group]
+            num.innerText  = tech?.label ?? id
+            num.style.color = color ?? ''
             row.style.setProperty('--tc', color ?? '') }
 
         applyColor()
@@ -30,27 +29,29 @@ export const createList = (sequence, techniques, onGroupChange) => {
         num.addEventListener('click', (e) => {
             e.stopPropagation()
             const next = groupKeys[(groupKeys.indexOf(tech.group) + 1) % groupKeys.length]
-            tech.group = next
-            applyColor()
-            onGroupChange?.() })
+            store.update(id, { group: next })
+            applyColor() })
 
         const markEl = div(styles.listMark)
         markEl.innerText = tech.mark ?? marks[0]
         markEl.addEventListener('click', (e) => {
             e.stopPropagation()
             const next = marks[(marks.indexOf(tech.mark) + 1) % marks.length]
-            tech.mark = next
-            markEl.innerText = next
-            onGroupChange?.() })
+            store.update(id, { mark: next })
+            markEl.innerText = next })
 
         row.append(num, name, markEl)
         return row }
 
-    const rows = sequence.map(makeRow)
+    const rows = store.sequence.map(makeRow)
     rows.forEach(r => list.append(r))
 
-    const { select, selectNext: listNext, selectPrev: listPrev, selectById: listById } = createSelector(rows, list, styles.listRowSelected)
-    rows.forEach((row, i) => row.addEventListener('click', () => select(i)))
+    const { select, selectById } = createSelector(rows, styles.listRowSelected)
+    rows.forEach((row, i) => row.addEventListener('click', () => {
+        select(i)
+        store.select(Number(row.dataset.id)) }))
 
-    return { list, listNext, listPrev, listById }
+    store.el.addEventListener('select', ({ detail: id }) => selectById(id))
+
+    return { list }
 }
