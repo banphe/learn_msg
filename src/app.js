@@ -1,45 +1,31 @@
-import { createGrip }   from './grip.js'
-import { createGrid }   from './grid.js'
-import { createList }   from './list.js'
-import { createMicBtn } from './micBtn.js'
-import { createPlayer } from './player.js'
-import { createSlider } from './slider.js'
-import { createTile }   from './tile.js'
-import { createVoice }  from './voice.js'
-import { createStore }  from './store.js'
-import { styles }       from './styles.js'
-import { div, pane, createTabs } from './utils.js'
-import { tileGroups, marks }     from './constants.js'
+import { createGrip }     from './grip.js'
+import { createGrid }     from './grid.js'
+import { createList }     from './list.js'
+import { createMicBtn }   from './micBtn.js'
+import { createPlayer }   from './player.js'
+import { createSlider }   from './slider.js'
+import { createTile }     from './tile.js'
+import { createVoice }    from './voice.js'
+import { createTechName } from './techName.js'
+import { Store }          from './store.js'
+import { saveTechniques } from './api.js'
+import { styles }         from './styles.js'
+import { pane, createTabs } from './utils.js'
 
 document.documentElement.setAttribute('data-theme', 'business')
 document.body.classList.add(...styles.body.split(' '))
 
-const SEQUENCE_FILE   = 'src/sequences/all.json'
-const TECHNIQUES_FILE = 'src/techniques.json'
-
 const [techniquesArr, sequence] = await Promise.all([
-    fetch(TECHNIQUES_FILE).then(r => r.json()),
-    fetch(SEQUENCE_FILE).then(r => r.json()),
+    fetch('src/techniques.json').then(r => r.json()),
+    fetch('src/sequences/all.json').then(r => r.json()),
 ])
 
-for (const t of techniquesArr) { if (!t.mark) t.mark = marks[0] }
-
-const saveTechniques = () => fetch('/save', {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({
-        file:    TECHNIQUES_FILE,
-        content: JSON.stringify(techniquesArr, null, 2) + '\n' }) })
-
-const store  = createStore(techniquesArr, sequence, saveTechniques)
+const store  = new Store(techniquesArr, sequence, () => saveTechniques(techniquesArr))
 const player = createPlayer()
 
-store.el.addEventListener('select', ({ detail: id }) => {
-    const tech = store.get(id)
-    if (!tech) return
-    player.show(tech)
-    techName.innerText   = tech.name
-    techName.style.color = tileGroups[tech.group] ?? '' })
+store.addEventListener('select', ({ detail: id }) => {
+    const tech = store.getTechnique(id)
+    if (tech) player.show(tech) })
 
 const voice = createVoice({
     'następna':   () => store.selectNext(),
@@ -50,19 +36,19 @@ const voice = createVoice({
     'graj':       () => player.play(),
 }, (id) => store.select(id))
 
-const tiles  = sequence.map(id => createTile(id, store.get(id)?.group))
-const grid   = createGrid(tiles, store)
-const list   = createList(store)
+const tiles    = sequence.map(id => createTile(id, store.getTechnique(id)?.group))
+const grid     = createGrid(tiles, store)
+const list     = createList(store, sequence)
+const techName = createTechName(store)
 
 const [tabs, tabGrid, tabList] = createTabs(styles.tabs, styles.tab, 'Siatka', 'Lista')
-const slider   = createSlider(60, 200, 100, (v) => grid.setSize(v))
-const micBtn   = createMicBtn(() => voice.toggle())
-const techName = div(styles.techName)
-const tb       = pane(styles.tb, micBtn, slider, tabs, techName)
-const left     = pane(styles.left, grid.grid, list.list)
-const right    = pane(styles.right, player.el)
-const grip     = createGrip(left)
-const cnt      = pane(styles.cnt, left, grip, right)
+const slider = createSlider(60, 200, 100, (v) => grid.setSize(v))
+const micBtn = createMicBtn(() => voice.toggle())
+const tb     = pane(styles.tb, micBtn, slider, tabs, techName)
+const left   = pane(styles.left, grid.grid, list.list)
+const right  = pane(styles.right, player.el)
+const grip   = createGrip(left)
+const cnt    = pane(styles.cnt, left, grip, right)
 
 const setView = (toGrid) => {
     grid.grid.style.display = toGrid ? '' : 'none'

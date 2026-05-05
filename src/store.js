@@ -1,34 +1,33 @@
-export const createStore = (techniquesArr, sequence, onSave) => {
-    const data        = new Map(techniquesArr.map(t => [t.id, t]))
-    const bus         = new EventTarget()
-    let   selectedIdx = -1
+import { marks } from './constants.js'
 
-    const emit = (name, detail) =>
-        bus.dispatchEvent(new CustomEvent(name, { detail }))
+export class Store extends EventTarget {
+    #data
+    #sequence
+    #selectedIdx = -1
+    #onSave
 
-    const select = (id) => {
-        selectedIdx = sequence.indexOf(id)
-        emit('select', id) }
+    constructor(techniquesArr, sequence, onSave) {
+        super()
+        for (const t of techniquesArr) { if (!t.mark) t.mark = marks[0] }
+        this.#data     = new Map(techniquesArr.map(t => [t.id, t]))
+        this.#sequence = sequence
+        this.#onSave   = onSave }
 
-    const selectNext = () => {
-        if (selectedIdx < sequence.length - 1)
-            select(sequence[selectedIdx + 1]) }
+    getTechnique(id) { return this.#data.get(id) }
 
-    const selectPrev = () => {
-        if (selectedIdx > 0)
-            select(sequence[selectedIdx - 1]) }
+    select(id) {
+        this.#selectedIdx = this.#sequence.indexOf(id)
+        this.dispatchEvent(new CustomEvent('select', { detail: id })) }
 
-    const update = (id, patch) => {
-        Object.assign(data.get(id), patch)
-        onSave?.() }
+    selectNext() {
+        if (this.#selectedIdx < this.#sequence.length - 1)
+            this.select(this.#sequence[this.#selectedIdx + 1]) }
 
-    return {
-        el: bus,
-        get:        (id) => data.get(id),
-        sequence,
-        select,
-        selectNext,
-        selectPrev,
-        update,
-    }
+    selectPrev() {
+        if (this.#selectedIdx > 0)
+            this.select(this.#sequence[this.#selectedIdx - 1]) }
+
+    update(id, patch) {
+        Object.assign(this.#data.get(id), patch)
+        this.#onSave?.() }
 }

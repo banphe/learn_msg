@@ -16,7 +16,7 @@ export const createGrid = (tiles, store) => {
             store.select(Number(tile.dataset.id)) })
         grid.append(tile) })
 
-    store.el.addEventListener('select', ({ detail: id }) => selectById(id))
+    store.addEventListener('select', ({ detail: id }) => selectById(id))
 
     return { grid, setSize }
 }

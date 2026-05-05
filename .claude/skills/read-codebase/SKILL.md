@@ -12,7 +12,7 @@ disable-model-invocation: true
   - .vscode - Tutaj znajdują sie ustawienia VSC - nie ma co tym zasmiecać kontekstu. 
 
 src\techniques.json 
-Z tego pliku wystarczy przeczytac pierwsze 11 linijek aby zrozumieć strukture. To jest baza danych.
+Z tego pliku wystarczy przeczytac pierwsze 30 linijek aby zrozumieć strukture. To jest baza danych.
 
   NIe pokazuj mi ani drzewa ani zawartości plików. Szkoda jest żebys zabierał miejsce w oknie kontekstowym jeżeli ja i tak to wszystko widze w explorerze/edytorze.
 

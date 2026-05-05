@@ -5,11 +5,11 @@ import { tileGroups, marks } from './constants.js'
 
 const groupKeys = Object.keys(tileGroups)
 
-export const createList = (store) => {
+export const createList = (store, sequence) => {
     const list = div(styles.list)
 
     const makeRow = (id) => {
-        const tech = store.get(id)
+        const tech = store.getTechnique(id)
         const row  = div(styles.listRow)
         row.dataset.id = id
 
@@ -43,7 +43,7 @@ export const createList = (store) => {
         row.append(num, name, markEl)
         return row }
 
-    const rows = store.sequence.map(makeRow)
+    const rows = sequence.map(makeRow)
     rows.forEach(r => list.append(r))
 
     const { select, selectById } = createSelector(rows, styles.listRowSelected)
@@ -51,7 +51,7 @@ export const createList = (store) => {
         select(i)
         store.select(Number(row.dataset.id)) }))
 
-    store.el.addEventListener('select', ({ detail: id }) => selectById(id))
+    store.addEventListener('select', ({ detail: id }) => selectById(id))
 
     return { list }
 }

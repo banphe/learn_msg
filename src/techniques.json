@@ -67,7 +67,7 @@
     "start": 96,
     "end": 132,
     "group": "blue",
-    "mark": "🟧"
+    "mark": "🟥"
   },
   {
     "id": 9,
@@ -117,7 +117,7 @@
     "start": 271,
     "end": 313,
     "group": "blue",
-    "mark": "🟧"
+    "mark": "🟥"
   },
   {
     "id": 14,
