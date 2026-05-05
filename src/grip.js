@@ -10,21 +10,22 @@ export const createGrip = (left) => {
     let startX = 0
     let startWidth = 0
 
-    grip.addEventListener('mousedown', (e) => {
+    grip.addEventListener('pointerdown', (e) => {
         isDragging = true
         startX = e.clientX
         startWidth = left.getBoundingClientRect().width
+        grip.setPointerCapture(e.pointerId)
         document.body.style.userSelect = 'none'
     })
 
-    document.addEventListener('mousemove', (e) => {
+    grip.addEventListener('pointermove', (e) => {
         if (!isDragging) return
         const delta = e.clientX - startX
         const newWidth = Math.max(50, startWidth + delta)
         left.style.width = newWidth + 'px'
     })
 
-    document.addEventListener('mouseup', () => {
+    grip.addEventListener('lostpointercapture', () => {
         isDragging = false
         document.body.style.userSelect = ''
     })
