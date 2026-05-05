@@ -20,7 +20,9 @@ export const styles = {
     listRow:   'flex items-center gap-3 px-3 py-2 rounded cursor-pointer hover:bg-base-200',
     listRowSelected: 'list-row-selected',
     listNum:   'font-bold w-8 shrink-0',
-    listName:  'text-sm',
+    listName:      'text-sm flex-1 min-w-0',
+    listNameInput: 'text-sm bg-base-content text-base-100 rounded px-2 py-0.5 outline-none border-0 min-w-0 w-full',
     listMark:  'ml-auto cursor-pointer text-base leading-none select-none',
-    techName:  'ml-8 flex-1 text-2xl font-bold uppercase tracking-widest',
+    techName:      'ml-8 flex-1 text-2xl font-bold uppercase tracking-widest',
+    techNameInput: 'input input-ghost text-2xl font-bold uppercase tracking-widest flex-1 ml-8 p-0 focus:outline-none',
 }

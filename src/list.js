@@ -15,12 +15,39 @@ export const createList = (store, sequence) => {
 
         const num  = div(styles.listNum)
         num.style.userSelect = 'none'
+
         const name = div(styles.listName)
         name.innerText = tech?.name ?? ''
 
+        name.addEventListener('dblclick', (e) => {
+            e.stopPropagation()
+
+            const input = document.createElement('input')
+            input.className   = styles.listNameInput
+            input.style.font  = 'inherit'
+            input.value       = tech.name
+
+            let done = false
+            const finish = (save) => {
+                if (done) return
+                done = true
+                if (save) store.update(id, { name: input.value })
+                name.innerText = tech.name
+                input.replaceWith(name) }
+
+            input.addEventListener('blur',    () => finish(true))
+            input.addEventListener('keydown', (e) => {
+                e.stopPropagation()
+                if (e.key === 'Enter')  { input.blur() }
+                if (e.key === 'Escape') { finish(false) } })
+
+            name.replaceWith(input)
+            input.focus()
+            input.select() })
+
         const applyColor = () => {
-            const color    = tileGroups[tech.group]
-            num.innerText  = tech?.label ?? id
+            const color     = tileGroups[tech.group]
+            num.innerText   = tech?.label ?? id
             num.style.color = color ?? ''
             row.style.setProperty('--tc', color ?? '') }
 

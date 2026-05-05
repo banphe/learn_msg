@@ -29,5 +29,6 @@ export class Store extends EventTarget {
 
     update(id, patch) {
         Object.assign(this.#data.get(id), patch)
+        this.dispatchEvent(new CustomEvent('update', { detail: { id, patch } }))
         this.#onSave?.() }
 }
