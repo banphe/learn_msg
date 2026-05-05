@@ -25,7 +25,6 @@ export const createStore = (techniquesArr, sequence, onSave) => {
     return {
         el: bus,
         get:        (id) => data.get(id),
-        getAll:     ()   => techniquesArr,
         sequence,
         select,
         selectNext,

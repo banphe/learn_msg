@@ -9,7 +9,6 @@ export const btn     = (classes) => el('button', classes)
 export const i       = (classes) => el('i', classes)
 export const range   = (classes) => { const e = el('input', classes); e.type = 'range'; return e }
 export const pane    = (classes, ...items) => { const p = div(classes); p.append(...items); return p }
-export const on      = (event, handler, ...els) => els.forEach(e => e.addEventListener(event, handler))
 
 export const createTabs = (containerClass, tabClass, ...labels) => {
     const container = div(containerClass)
