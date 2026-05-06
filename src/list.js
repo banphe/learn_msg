@@ -1,19 +1,20 @@
 import { styles }         from './styles.js'
-import { div }            from './utils.js'
+import { div, btn }       from './utils.js'
 import { createSelector } from './selector.js'
 import { tileGroups, marks } from './constants.js'
 
 const groupKeys = Object.keys(tileGroups)
 
-export const createList = (store, sequence) => {
+export const createList = (store) => {
     const list = div(styles.list)
+    let selector = null
 
     const makeRow = (id) => {
         const tech = store.getTechnique(id)
         const row  = div(styles.listRow)
         row.dataset.id = id
 
-        const num  = div(styles.listNum)
+        const num = div(styles.listNum)
         num.style.userSelect = 'none'
 
         const name = div(styles.listName)
@@ -21,11 +22,10 @@ export const createList = (store, sequence) => {
 
         name.addEventListener('dblclick', (e) => {
             e.stopPropagation()
-
             const input = document.createElement('input')
-            input.className   = styles.listNameInput
-            input.style.font  = 'inherit'
-            input.value       = tech.name
+            input.className  = styles.listNameInput
+            input.style.font = 'inherit'
+            input.value      = tech.name
 
             let done = false
             const finish = (save) => {
@@ -67,18 +67,27 @@ export const createList = (store, sequence) => {
             store.update(id, { mark: next })
             markEl.innerText = next })
 
-        row.append(num, name, markEl)
+        const removeBtn = btn(styles.listRemoveBtn)
+        removeBtn.innerHTML = `<i class="${styles.listRemoveIcon}"></i>`
+        removeBtn.addEventListener('click', (e) => {
+            e.stopPropagation()
+            store.removeFromSequence(id) })
+
+        row.append(num, name, markEl, removeBtn)
         return row }
 
-    const rows = sequence.map(makeRow)
-    rows.forEach(r => list.append(r))
+    const buildRows = () => {
+        list.innerHTML = ''
+        const rows = store.sequence.map(makeRow)
+        rows.forEach(r => list.append(r))
+        selector = createSelector(rows, styles.listRowSelected)
+        rows.forEach((row, i) => row.addEventListener('click', () => {
+            selector.select(i)
+            store.select(Number(row.dataset.id)) })) }
 
-    const { select, selectById } = createSelector(rows, styles.listRowSelected)
-    rows.forEach((row, i) => row.addEventListener('click', () => {
-        select(i)
-        store.select(Number(row.dataset.id)) }))
-
-    store.addEventListener('select', ({ detail: id }) => selectById(id))
+    buildRows()
+    store.addEventListener('select',         ({ detail: id }) => selector?.selectById(id))
+    store.addEventListener('sequenceChange', buildRows)
 
     return { list }
 }

@@ -1,10 +1,12 @@
+import { styles } from './styles.js'
+
 export class YouTubePlayer extends EventTarget {
     #yt      = null
     #tech    = null
     #timer   = null
     #pending = null
     el       = Object.assign(document.createElement('div'), {
-        style: 'width:100%;height:100%;min-height:300px' })
+        className: styles.player })
 
     constructor() {
         super()

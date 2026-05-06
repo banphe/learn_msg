@@ -3,7 +3,7 @@ import { div, i } from './utils.js'
 
 export const createGrip = (left) => {
     const grip   = div(styles.grip)
-    const handle = i(styles.handle)
+    const handle = i(styles.iconGrip)
     grip.appendChild(handle)
 
     let isDragging = false
