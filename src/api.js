@@ -11,3 +11,9 @@ export const saveSequence = (filename, sequence) =>
 
 export const saveIndex = (index) =>
     post('src/sequences/index.json', JSON.stringify(index, null, 2) + '\n')
+
+export const deleteSequence = (filename) =>
+    fetch('/delete', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ file: `src/sequences/${filename}` }) })

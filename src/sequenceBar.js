@@ -1,7 +1,7 @@
 import { styles }   from './styles.js'
 import { div, btn } from './utils.js'
 
-export const createSequenceBar = (sequences, store, onSaveIndex, onSaveSeq) => {
+export const createSequenceBar = (sequences, store, onSaveIndex, onSaveSeq, onDelete) => {
     const bar        = div(styles.seqBar)
     const dropdown   = div(styles.seqDropdown)
     const dropBtn    = div(styles.seqDropdownBtn)
@@ -90,10 +90,14 @@ export const createSequenceBar = (sequences, store, onSaveIndex, onSaveSeq) => {
 
     delBtn.addEventListener('click', () => {
         if (sequences.length <= 1) return
-        const idx  = sequences.findIndex(s => s.file === store.sequenceFile)
+        const idx      = sequences.findIndex(s => s.file === store.sequenceFile)
+        const fileToDelete = sequences[idx].file
         sequences.splice(idx, 1)
         const next = sequences[Math.max(0, idx - 1)]
-        onSaveIndex(sequences)
+        Promise.all([
+            onSaveIndex(sequences),
+            onDelete?.(fileToDelete),
+        ])
         fetch(`src/sequences/${next.file}`)
             .then(r => r.json())
             .then(seq => store.setSequence(seq, next.file, next.name)) })

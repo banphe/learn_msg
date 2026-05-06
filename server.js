@@ -26,6 +26,26 @@ const server = http.createServer((req, res) => {
         res.end()
         return }
 
+    if (req.method === 'POST' && req.url === '/delete') {
+        let body = ''
+        req.on('data', chunk => body += chunk)
+        req.on('end', () => {
+            try {
+                const { file } = JSON.parse(body)
+                const abs = path.resolve(ROOT, file)
+                if (!abs.startsWith(ROOT)) {
+                    res.writeHead(403, headers)
+                    res.end('Forbidden')
+                    return }
+                fs.unlinkSync(abs)
+                res.writeHead(200, { ...headers, 'Content-Type': 'application/json' })
+                res.end(JSON.stringify({ ok: true }))
+            } catch (e) {
+                res.writeHead(500, headers)
+                res.end(e.message) }
+        })
+        return }
+
     if (req.method === 'POST' && req.url === '/save') {
         let body = ''
         req.on('data', chunk => body += chunk)

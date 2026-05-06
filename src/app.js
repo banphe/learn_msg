@@ -8,7 +8,7 @@ import { createVoice }       from './voice.js'
 import { createTechName }    from './techName.js'
 import { createSequenceBar } from './sequenceBar.js'
 import { Store }             from './store.js'
-import { saveTechniques, saveSequence, saveIndex } from './api.js'
+import { saveTechniques, saveSequence, saveIndex, deleteSequence } from './api.js'
 import { styles }            from './styles.js'
 import { pane, createTabs }  from './utils.js'
 
@@ -46,7 +46,7 @@ const voice = createVoice({
 
 const grid     = createGrid(initialSeq, store)
 const list     = createList(store)
-const seqBar   = createSequenceBar(sequences, store, saveIndex, saveSequence)
+const seqBar   = createSequenceBar(sequences, store, saveIndex, saveSequence, deleteSequence)
 const techName = createTechName(store)
 
 store.addEventListener('sequenceChange', ({ detail: { sequence } }) => {
